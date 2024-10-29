@@ -4,6 +4,8 @@ project(json_eval)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -17,6 +19,11 @@ enable_testing()
 add_executable(
     hello_test
     hello_test.cc
+)
+
+add_executable(
+    json_eval
+    json_eval.cpp
 )
 
 target_link_libraries(
