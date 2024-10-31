@@ -21,7 +21,9 @@ class Node {
         const node_type type;
     public:
         Node(const std::string &k, node_type t) : key(k), type(t) {}
+        virtual ~Node() {}
         node_type GetType() const {return type;}
+        std::string GetKey() const {return key;}
 };
 
 class Value : public Node {
@@ -29,6 +31,7 @@ class Value : public Node {
         std::string value;
     public:
         Value(const std::string &k, const std::string &v) : Node(k, node_type::value), value(v) {}
+        ~Value() override {}
         std::string asString() const {return value;}
 
 };
@@ -39,6 +42,7 @@ class Array : public Node {
     public:
         Array(const std::string &k, const std::string &v) :
             Node(k, node_type::array) {}
+        ~Array() override {}
         const Array &operator[](int index);
 };
 
@@ -48,12 +52,13 @@ class Object : public Node {
     public:
         Object(const std::string &k, const std::string &v) : 
             Node(k, node_type::object) {}
+        ~Object() override {}
         const Object &operator[](const std::string &key);
 };
 
-Node readJson(const std::string &filename);
+std::shared_ptr<Node> readJson(const std::string &filename);
 
-std::string eval(Node n, std::string arg);
+std::string eval(std::shared_ptr<Node> &n, std::string &arg);
 
 
 }
