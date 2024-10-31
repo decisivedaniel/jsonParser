@@ -1,5 +1,5 @@
-#include "json_eval.h"
-#include "gtest/gtest.h"
+#include "json.h"
+#include <gtest/gtest.h>
 
 namespace {
     class JsonTest : public testing::Test {
@@ -14,9 +14,9 @@ namespace {
     };
 
     TEST_F(JsonTest, Trivial) {
-        EXPECT_EQ(Json::eval(base, std::string("a.b[1]")), "2") << "a.b[1] does not return 2";
-        EXPECT_EQ(Json::eval(base, std::string("a.b[2].c")),"test") << "a.b[2].c does not equal test";
-        EXPECT_EQ(Json::eval(base, std::string("a.b")), '[ 1, 2, { "c" : "test" } ]');
+        EXPECT_EQ(Json::eval(base, std::string("a.b[1]")), std::string("2")) << "a.b[1] does not return 2";
+        EXPECT_EQ(Json::eval(base, std::string("a.b[2].c")),std::string("test")) << "a.b[2].c does not equal test";
+        EXPECT_EQ(Json::eval(base, std::string("a.b")), std::string("[ 1, 2, { \"c\" : \"test\" } ]"));
 
     }
 }
