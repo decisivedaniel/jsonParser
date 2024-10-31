@@ -58,7 +58,7 @@ class Object : public Node {
 
 std::shared_ptr<Node> readJson(const std::string &filename);
 
-std::string eval(std::shared_ptr<Node> &n, std::string &arg);
+std::string eval(std::shared_ptr<Node> &n, const std::string &arg);
 
 
 }

@@ -7,16 +7,16 @@ namespace {
             JsonTest() {
                 std::string testFile = "test.json";
                 std::ifstream TestFile(testFile);
-                base = readJson(&TestFile);
+                base = Json::readJson(testFile);
                 TestFile.close();
             }
-            JsonBase base;
+            std::shared_ptr<Json::Node> base;
     };
 
     TEST_F(JsonTest, Trivial) {
-        EXPECT_EQ(base.eval("a.b[1]"), "2") << "a.b[1] does not return 2";
-        EXPECT_EQ(base.eval("a.b[2].c"),"test") << "a.b[2].c does not equal test";
-        EXPECT_EQ(base.eval("a.b"), '[ 1, 2, { "c" : "test" } ]');
+        EXPECT_EQ(Json::eval(base, std::string("a.b[1]")), "2") << "a.b[1] does not return 2";
+        EXPECT_EQ(Json::eval(base, std::string("a.b[2].c")),"test") << "a.b[2].c does not equal test";
+        EXPECT_EQ(Json::eval(base, std::string("a.b")), '[ 1, 2, { "c" : "test" } ]');
 
     }
 }
