@@ -21,7 +21,7 @@ namespace {
 
     }
 
-    TEST(Exception, JsonParsing) {
+    TEST(JsonParsing, Execptions) {
         EXPECT_THROW ({
             try {
                 Json::readJson("doesnotexist.json");
@@ -38,5 +38,10 @@ namespace {
                 throw;
             }
         }, std::invalid_argument);
+    }
+
+    TEST(JsonParcing, Simple) {
+        std::shared_ptr<Json::Node> base = Json::readJson("simpleObject.json");
+        EXPECT_EQ(base->GetRaw(), "{\"a\" : 1,\"b\" : \"3\",\"c\" : 1.3,\"d\" : \"test string\"\"}");
     }
 }
