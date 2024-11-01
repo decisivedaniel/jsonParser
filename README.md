@@ -8,6 +8,11 @@ C++ console application for parcing of Json
 3. run `cmake --build build`
 4. run `cd build && ctest` or go into build folder and run ctest
 
+If you prefer to run gcc the following command will work for getting json_eval compiled
+
+1. `gcc -o json_eval.exe json_eval.cpp json.cpp -lstdc++`
+2. ./json_eval.exe "{file name}" "{function to run}"
+
 # Design Decisions
 
 ## virtual base class
