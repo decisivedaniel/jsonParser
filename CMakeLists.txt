@@ -56,3 +56,7 @@ target_link_libraries(
 include(GoogleTest)
 gtest_discover_tests(hello_test)
 gtest_discover_tests(json_eval_unittest)
+
+add_custom_command(TARGET json_eval PRE_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        ${CMAKE_SOURCE_DIR}/test/ $<TARGET_FILE_DIR:json_eval>)           
