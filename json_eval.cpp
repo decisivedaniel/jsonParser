@@ -9,8 +9,6 @@ int main(int argc, char** argv) {
 
     std::shared_ptr<Json::Node> json = Json::readJson(filename);
 
-    //auto value = std::dynamic_pointer_cast<Json::Value>(json);
-
     std::cout << eval(json, argument);
 
     //JsonFile.close();
