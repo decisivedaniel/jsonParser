@@ -4,9 +4,8 @@ std::shared_ptr<Json::Node> Json::readJson(const std::string &filename) {
     std::ifstream jsonFile;
     std::shared_ptr<Json::Node> base;
     jsonFile.open(filename);
-    std::string line;
     if (jsonFile.is_open()) {
-        base = Json::parseJson(&jsonFile);
+        base = Json::parseJson(jsonFile);
     } else {
         throw std::invalid_argument("File doesn't exist");
     }
@@ -14,11 +13,14 @@ std::shared_ptr<Json::Node> Json::readJson(const std::string &filename) {
     return base;
 }
 
-std::shared_ptr<Json::Node> Json::parseJson(std::ifstream *file) {
+std::shared_ptr<Json::Node> Json::parseJson(std::istream &file) {
+    std::cout << "get to parse"<< std::endl;
     char current;
     do {
-        file->get(current);
-    } while (current != ' ');
+        file.get(current);
+        std::cout<<"current: " << current <<std::endl;
+    } while (current == ' ');
+
     switch (current) {
         case '{':
             return Json::makeObject(file);
@@ -29,37 +31,37 @@ std::shared_ptr<Json::Node> Json::parseJson(std::ifstream *file) {
         case '}':
             throw std::invalid_argument("Json File is malformed");
         default:
-            file->unget();
+            file.unget();
             return Json::makeValue(file);
     }
 }
 
-std::shared_ptr<Json::Object> Json::makeObject(std::ifstream *file) {
-
+std::shared_ptr<Json::Object> Json::makeObject(std::istream &file) {
+    return std::make_shared<Json::Object>("key", "value");
 }
-std::shared_ptr<Json::Array> Json::makeArray(std::ifstream *file) {
-
+std::shared_ptr<Json::Array> Json::makeArray(std::istream &file) {
+    return std::make_shared<Json::Array>("key", "value");
 }
-std::shared_ptr<Json::Value> Json::makeValue(std::ifstream *file, const int arrayKey) {
+std::shared_ptr<Json::Value> Json::makeValue(std::istream &file, const int arrayKey) {
     std::stringstream key("");
     char current;
     if (arrayKey == -1) {
         // read object key
-        file->get(current);
-        while (current !=' ') {
-            file->get(current);
+        file.get(current);
+        while (current == ' ') {
+            file.get(current);
         }
         if (current == '"') {
             do {
                 key << current;
-                file->get(current);
+                file.get(current);
             } while (current != '"');
         }
     } else {
         key << arrayKey;
     }
     std::stringstream value("");
-    file->get(current);
+    file.get(current);
     while(Json::isValue(current)) {
         value << current;
     };
