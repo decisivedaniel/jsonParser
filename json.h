@@ -20,11 +20,14 @@ class Node {
     private:
         std::string key;
         const node_type type;
+        std::string raw;
     public:
         Node(const std::string &k, node_type t) : key(k), type(t) {}
         virtual ~Node() {}
         node_type GetType() const {return type;}
         std::string GetKey() const {return key;}
+        void setRaw(const std::string &derivedRaw) {raw = derivedRaw;}
+        std::string GetRaw() const {return raw;}
 };
 
 class Value : public Node {
@@ -49,22 +52,24 @@ class Array : public Node {
 
 class Object : public Node {
     private:
-        std::unordered_map<std::string, Node> values;
+        std::unordered_map<std::string, std::shared_ptr<Node>> properties;
     public:
         Object(const std::string &k, const std::string &v) : 
             Node(k, node_type::object) {}
         ~Object() override {}
+        void addProp(const std::string &k, const std::shared_ptr<Node> &node);
         const Object &operator[](const std::string &key);
 };
 
 std::shared_ptr<Node> readJson(const std::string &filename);
-std::shared_ptr<Node> parseJson(std::istream &file);
+std::shared_ptr<Node> parseJson(std::istream &file, const std::string &key);
 std::string eval(std::shared_ptr<Node> &n, const std::string &arg);
 
-std::shared_ptr<Object> makeObject(std::istream &file);
-std::shared_ptr<Array> makeArray(std::istream &file);
-std::shared_ptr<Value> makeValue(std::istream &file, const int arrayKey = -1);
+std::shared_ptr<Object> makeObject(std::istream &file, const std::string &objectKey);
+std::shared_ptr<Array> makeArray(std::istream &file, const std::string &arrayKey);
+std::shared_ptr<Value> makeValue(std::istream &file, const std::string &valueKey);
 bool isValue(const char test);
+void clearWhitespace(std::istream &file);
 
 
 }

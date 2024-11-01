@@ -5,7 +5,7 @@ std::shared_ptr<Json::Node> Json::readJson(const std::string &filename) {
     std::shared_ptr<Json::Node> base;
     jsonFile.open(filename);
     if (jsonFile.is_open()) {
-        base = Json::parseJson(jsonFile);
+        base = Json::parseJson(jsonFile, "root");
     } else {
         throw std::invalid_argument("File doesn't exist");
     }
@@ -13,68 +13,87 @@ std::shared_ptr<Json::Node> Json::readJson(const std::string &filename) {
     return base;
 }
 
-std::shared_ptr<Json::Node> Json::parseJson(std::istream &file) {
-    std::cout << "get to parse"<< std::endl;
+std::shared_ptr<Json::Node> Json::parseJson(std::istream &file, const std::string &key) {
     char current;
-    do {
-        file.get(current);
-        std::cout<<"current: " << current <<std::endl;
-    } while (current == ' ');
-
+    file >> current;
     switch (current) {
         case '{':
-            return Json::makeObject(file);
+            return Json::makeObject(file, key);
         case '[':
-            return Json::makeArray(file);
+            return Json::makeArray(file, key);
         case ':':
         case ']':
         case '}':
             throw std::invalid_argument("Json File is malformed");
         default:
             file.unget();
-            return Json::makeValue(file);
+            return Json::makeValue(file, key);
     }
 }
 
-std::shared_ptr<Json::Object> Json::makeObject(std::istream &file) {
-    return std::make_shared<Json::Object>("key", "value");
+std::shared_ptr<Json::Object> Json::makeObject(std::istream &file, const std::string &objectKey) {
+    std::stringstream raw("{");
+    auto object = std::make_shared<Json::Object>(objectKey,"");
+    // read object key
+    char current;
+    do {
+        file >> current;
+        if (current != '"') {
+            throw std::invalid_argument("Object expected an \"");
+        }
+        std::stringstream key("");
+        do {
+            key << current;
+            file.get(current);
+        } while (current != '"');
+        raw  << key.str() << "\" ";
+        file >> current;
+        if (current != ':') {
+            throw std::invalid_argument("Object expected an :");
+        }
+        std::shared_ptr<Json::Node> node = Json::parseJson(file, key.str());
+        object->addProp(key.str(), node);
+        raw << ": " << node->GetRaw();
+        file >> current;
+        if (current != ',' && current != '}') {
+            std::cout << "incorrect: " << current << std::endl;
+            throw std::invalid_argument("expected in end of object or another property");
+        }
+        raw << current;
+    } while (current != '}');
+
+    object->setRaw(raw.str());
+    return object;
 }
-std::shared_ptr<Json::Array> Json::makeArray(std::istream &file) {
+
+void Json::Object::addProp(const std::string &k, const std::shared_ptr<Json::Node> &node) {
+    properties.emplace(k, node);
+}
+
+std::shared_ptr<Json::Array> Json::makeArray(std::istream &file,const std::string &arrayKey) {
     return std::make_shared<Json::Array>("key", "value");
 }
-std::shared_ptr<Json::Value> Json::makeValue(std::istream &file, const int arrayKey) {
-    std::stringstream key("");
-    char current;
-    if (arrayKey == -1) {
-        // read object key
-        file.get(current);
-        while (current == ' ') {
-            file.get(current);
-        }
-        if (current == '"') {
-            do {
-                key << current;
-                file.get(current);
-            } while (current != '"');
-        }
-    } else {
-        key << arrayKey;
-    }
+std::shared_ptr<Json::Value> Json::makeValue(std::istream &file, const std::string &valueKey) {
     std::stringstream value("");
+    char current;
     file.get(current);
     while(Json::isValue(current)) {
         value << current;
-    };
-    return std::make_shared<Json::Value>(key.str(), value.str());
+        file.get(current);
+    }
+    auto jsonValue = std::make_shared<Json::Value>(valueKey, value.str());
+    jsonValue->setRaw(value.str());
+    file.unget();
+    return jsonValue;
 }
 
 bool Json::isValue(const char test) {
-    return (test > 15 && test < 26) || //Number
-    test == 2 || //Quote
-    test == 14 || // period
-    test == 32 || // space
-    (test > 64 && test < 91) || // capital letters
-    (test > 96 && test < 123); // lowercase letters
+    return (test >= '0' && test <= '9') || //Number
+    test == '"' || // Quote
+    test == '.' || // period
+    test == ' ' || // space
+    (test >= 'A' && test <= 'Z') || // capital letters
+    (test >= 'a' && test <= 'z'); // lowercase letters
 }
 
 
