@@ -7,9 +7,9 @@ int main(int argc, char** argv) {
 
     std::cout << filename << std::endl;
 
-    std::shared_ptr<Json::Node> json = Json::readJson(filename);
+    std::shared_ptr<Json::Node> base = Json::readJson(filename);
 
-    std::cout << eval(json, argument);
+    std::cout << Json::eval(base, argument);
 
     //JsonFile.close();
 
