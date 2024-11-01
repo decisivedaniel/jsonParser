@@ -76,7 +76,7 @@ bool Json::isValue(const char test) {
 }
 
 
-std::string Json::eval(std::shared_ptr<Node> &n, const std::string &arg) {
+std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
     return arg;
 }
 
