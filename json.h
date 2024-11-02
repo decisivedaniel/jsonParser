@@ -42,11 +42,14 @@ class Value : public Node {
 
 class Array : public Node {
     private:
-        std::unordered_map<int, Node> values;
+        std::unordered_map<int, std::shared_ptr<Node>> arrayNodes;
+        int size = 0;
     public:
         Array(const std::string &k, const std::string &v) :
             Node(k, node_type::array) {}
+        void append(const std::shared_ptr<Node> &toAdd); 
         ~Array() override {}
+        int GetSize() const {return size;}
         const Array &operator[](int index);
 };
 
