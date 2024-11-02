@@ -1,18 +1,17 @@
-#include "json_eval.h"
-#include <iostream>
+#include "json.h"
 
 
 int main(int argc, char** argv) {
-    std::string filename = argv[0];
-    std::string argument = argv[1];
+    std::string filename(argv[1]);
+    std::string argument (argv[2]);
 
-    std::ifstream JsonFile(filename);
+    std::cout << filename << std::endl;
 
-    JsonBase json = JsonFactory().readJson(&JsonFile);
+    std::shared_ptr<Json::Node> base = Json::readJson(filename);
 
-    std::cout << json.eval(&argument);
+    std::cout << Json::eval(base, argument);
 
-    JsonFile.close();
+    //JsonFile.close();
 
     return 0;
 }
