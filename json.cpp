@@ -108,6 +108,7 @@ void Json::Array::append(const std::shared_ptr<Json::Node> &toAdd) {
 }
 
 std::shared_ptr<Json::Value> Json::makeValue(std::istream &file, const std::string &valueKey) {
+    // TODO fix value so it parces if string or not. much more complex state system
     std::stringstream value;
     char current;
     file.get(current);
@@ -132,7 +133,64 @@ bool Json::isValue(const char test) {
 
 
 std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
-    return arg;
+    if (arg == "") {
+        return n->GetRaw();
+    } 
+    std::string returnValue;
+    std::string currentArg = arg;
+    std::string remainder = "";
+    std::string::size_type dotPos = arg.find('.');
+    if (dotPos != std::string::npos) {
+        currentArg = arg.substr(0, dotPos);
+        remainder = arg.substr(dotPos);
+    } 
+    switch (n->GetType()) {
+        case Json::node_type::object: 
+        {
+            auto object = std::dynamic_pointer_cast<Json::Object>(n);
+            //check for [] add arraypos back to the remainder "property[arraypos]"
+            std::string::size_type bracketPos = currentArg.find('[');
+            if (bracketPos != std::string::npos) {
+                currentArg = arg.substr(0, bracketPos);
+                remainder = arg.substr(bracketPos);
+            }
+            auto next = object->at(currentArg);
+            returnValue = Json::eval(next, remainder);
+            break;
+        }
+        case Json::node_type::array: 
+        {
+            auto array = std::dynamic_pointer_cast<Json::Array>(n);
+            if (currentArg[0] == '[') {
+                throw std::invalid_argument("Missing start bracket for array accessor");
+            }
+            std::string::size_type endBracketPos = currentArg.find(']');
+            if (endBracketPos != std::string::npos) {
+                currentArg = arg.substr(1, endBracketPos);
+            } else {
+                throw std::invalid_argument("Missing end bracket for array accessor");
+            }
+            auto next = array->at(std::stoi(currentArg));
+            returnValue = Json::eval(next, remainder);
+            break;
+        }
+        case Json::node_type::value:
+        {
+            throw std::invalid_argument("Value type does not have additional properties");
+            break;
+        }
+    }
+
+    return returnValue;
+    
 }
 
-  //auto value = std::dynamic_pointer_cast<Json::Value>(json);
+std::shared_ptr<Json::Node> Json::Object::at(const std::string &key) {
+    return properties.at(key);
+}
+
+std::shared_ptr<Json::Node> Json::Array::at(const int key) {
+    return arrayNodes.at(key);
+}
+
+  

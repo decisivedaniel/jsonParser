@@ -50,7 +50,7 @@ class Array : public Node {
         void append(const std::shared_ptr<Node> &toAdd); 
         ~Array() override {}
         int GetSize() const {return size;}
-        const Array &operator[](int index);
+        std::shared_ptr<Node> at(int index);
 };
 
 class Object : public Node {
@@ -61,7 +61,7 @@ class Object : public Node {
             Node(k, node_type::object) {}
         ~Object() override {}
         void addProp(const std::string &k, const std::shared_ptr<Node> &node);
-        const Object &operator[](const std::string &key);
+        std::shared_ptr<Node> at(const std::string &key);
 };
 
 std::shared_ptr<Node> readJson(const std::string &filename);
