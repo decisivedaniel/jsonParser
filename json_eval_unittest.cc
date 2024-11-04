@@ -21,6 +21,11 @@ namespace {
 
     }
 
+    TEST_F(JsonTest, Size) {
+        EXPECT_EQ(Json::eval(base, std::string("size(a)")), std::string("1"));
+        EXPECT_EQ(Json::eval(base, std::string("size(a.b)")), std::string("4"));
+    }
+
     TEST(JsonParsing, Execptions) {
         EXPECT_THROW ({
             try {
@@ -44,4 +49,6 @@ namespace {
         std::shared_ptr<Json::Node> base = Json::readJson("simpleObject.json");
         EXPECT_EQ(base->GetRaw(), "{ \"a\" : 1,\"b\" : \"3\",\"c\" : 1.3,\"d\" : \"test string\"}");
     }
+
+
 }
