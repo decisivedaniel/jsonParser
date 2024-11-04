@@ -8,7 +8,13 @@
 #include <unordered_map>
 #include <memory>
 
+#define MAX "max("
+#define MIN "min("
+#define SIZE "size("
+
 namespace Json {
+
+
 
 enum class node_type : char {
     value,
@@ -43,7 +49,7 @@ class Value : public Node {
     public:
         Value(const std::string &k, const std::string &v, const value_type type) : Node(k, node_type::value), value(v), valueType(type) {}
         ~Value() override {}
-        value_type getType() const {return valueType; }
+        value_type getValueType() const {return valueType; }
         std::string asString() const;
 
 };
@@ -69,6 +75,7 @@ class Object : public Node {
             Node(k, node_type::object) {}
         ~Object() override {}
         void addProp(const std::string &k, const std::shared_ptr<Node> &node);
+        int getSize() const { return properties.size(); }
         std::shared_ptr<Node> at(const std::string &key);
 };
 
@@ -76,6 +83,7 @@ std::shared_ptr<Node> readJson(const std::string &filename);
 std::shared_ptr<Node> parseJson(std::istream &file, const std::string &key);
 std::string eval(std::shared_ptr<Node> &n, const std::string &arg);
 std::shared_ptr<Node> findNode(std::shared_ptr<Node> &n, const std::string &arg);
+std::string size(std::shared_ptr<Node> &node, const std::string &arg);
 
 std::shared_ptr<Object> makeObject(std::istream &file, const std::string &objectKey);
 std::shared_ptr<Array> makeArray(std::istream &file, const std::string &arrayKey);

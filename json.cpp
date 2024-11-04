@@ -149,7 +149,7 @@ bool Json::isValue(const char test) {
 std::string Json::Value::asString() const {
     std::stringstream returnValue;
     returnValue << GetRaw();
-    if (getType() == value_type::string) {
+    if (getValueType() == value_type::string) {
         returnValue.str("");
         std::string::size_type lastquote = GetRaw().find_last_of('"'); 
         returnValue << GetRaw().substr(1,lastquote-1);
@@ -157,16 +157,66 @@ std::string Json::Value::asString() const {
     return returnValue.str();
 }
 
+bool prefix(const char *pre, const char *str) {
+    return strncmp(pre, str, strlen(pre)) == 0;
+}
+
 
 std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
-    auto node = Json::findNode(n, arg);
-    if (node->GetType() == Json::node_type::value) {
-        auto value = std::dynamic_pointer_cast<Json::Value>(node);
-        if (value->getType() == Json::value_type::string) {
-            return value->asString();
+    std::string::size_type openParent = arg.find('(');
+    std::string::size_type closeParent = arg.find(')');
+    std::string returnValue;
+    if (openParent == std::string::npos && closeParent == std::string::npos) {
+        auto node = Json::findNode(n, arg);
+        if (node->GetType() == Json::node_type::value) {
+            auto value = std::dynamic_pointer_cast<Json::Value>(node);
+            returnValue = value->asString();
+        } else {
+            returnValue = node->GetRaw();
+        }
+        
+    } else if (MAX == strstr(MAX, arg.c_str())) {
+
+    } else if (MIN == strstr(MIN, arg.c_str())) {
+
+    } else if (prefix(SIZE, arg.c_str())) {
+        std::string trimmed = arg.substr(openParent+1,closeParent-openParent-1);
+        auto node = Json::findNode(n, arg.substr(openParent+1,closeParent-openParent-1));
+        returnValue = Json::size(node, trimmed);
+    } else {
+        std::cout << arg << std::endl;
+        throw std::invalid_argument("Unsupported function");
+    }
+    return returnValue;
+}
+
+std::string Json::size(std::shared_ptr<Json::Node> &node, const std::string &arg) {
+    std::string returnValue;
+    switch (node->GetType()) {
+        case Json::node_type::object: 
+        {
+            auto object = std::dynamic_pointer_cast<Json::Object>(node);
+            returnValue = std::to_string(object->getSize());
+            break;
+        }
+        case Json::node_type::array: 
+        {
+            auto array = std::dynamic_pointer_cast<Json::Array>(node);
+            returnValue = std::to_string(array->GetSize());
+            break;
+        }
+        case Json::node_type::value: 
+        {
+            auto value = std::dynamic_pointer_cast<Json::Value>(node);
+            if (value->getValueType() == Json::value_type::string) {
+                returnValue = std::to_string(value->asString().size());
+            } else {
+                throw std::invalid_argument("only accept size checking on strings");
+            }
+            break;
         }
     }
-    return node->GetRaw();
+    return returnValue;
 }
 
 std::shared_ptr<Json::Node> Json::findNode(std::shared_ptr<Json::Node> &n, const std::string &arg) {
