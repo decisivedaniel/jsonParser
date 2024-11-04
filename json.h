@@ -75,6 +75,7 @@ class Object : public Node {
 std::shared_ptr<Node> readJson(const std::string &filename);
 std::shared_ptr<Node> parseJson(std::istream &file, const std::string &key);
 std::string eval(std::shared_ptr<Node> &n, const std::string &arg);
+std::shared_ptr<Node> findNode(std::shared_ptr<Node> &n, const std::string &arg);
 
 std::shared_ptr<Object> makeObject(std::istream &file, const std::string &objectKey);
 std::shared_ptr<Array> makeArray(std::istream &file, const std::string &arrayKey);

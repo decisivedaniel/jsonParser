@@ -159,16 +159,21 @@ std::string Json::Value::asString() const {
 
 
 std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
-    if (arg == "") {
-        if (n->GetType() == Json::node_type::value) {
-            auto value = std::dynamic_pointer_cast<Json::Value>(n);
-            if (value->getType() == Json::value_type::string) {
-                return value->asString();
-            }
+    auto node = Json::findNode(n, arg);
+    if (node->GetType() == Json::node_type::value) {
+        auto value = std::dynamic_pointer_cast<Json::Value>(node);
+        if (value->getType() == Json::value_type::string) {
+            return value->asString();
         }
-        return n->GetRaw();
-    } 
-    std::string returnValue;
+    }
+    return node->GetRaw();
+}
+
+std::shared_ptr<Json::Node> Json::findNode(std::shared_ptr<Json::Node> &n, const std::string &arg) {
+    if (arg == "") {
+        return n;
+    }
+    std::shared_ptr<Json::Node> returnValue;
     std::string currentArg = arg;
     std::string remainder = "";
     std::string::size_type dotPos = arg.find('.');
@@ -186,7 +191,7 @@ std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
                 remainder = arg.substr(bracketPos+1);
             }
             auto next = object->at(currentArg);
-            returnValue = Json::eval(next, remainder);
+            returnValue = Json::findNode(next, remainder);
             break;
         }
         case Json::node_type::array: 
@@ -202,7 +207,7 @@ std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
                 throw std::invalid_argument("Missing end bracket for array accessor");
             }
             auto next = array->at(std::stoi(currentArg));
-            returnValue = Json::eval(next, remainder);
+            returnValue = Json::findNode(next, remainder);
             break;
         }
         case Json::node_type::value:
@@ -211,9 +216,7 @@ std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
             break;
         }
     }
-
     return returnValue;
-    
 }
 
 std::shared_ptr<Json::Node> Json::Object::at(const std::string &key) {
