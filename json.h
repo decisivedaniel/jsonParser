@@ -16,6 +16,12 @@ enum class node_type : char {
     object
 };
 
+enum class value_type : char {
+    string,
+    number,
+    real
+};
+
 class Node {
     private:
         std::string key;
@@ -33,10 +39,12 @@ class Node {
 class Value : public Node {
     private:
         std::string value;
+        value_type valueType;
     public:
-        Value(const std::string &k, const std::string &v) : Node(k, node_type::value), value(v) {}
+        Value(const std::string &k, const std::string &v, const value_type type) : Node(k, node_type::value), value(v), valueType(type) {}
         ~Value() override {}
-        std::string asString() const {return value;}
+        value_type getType() const {return valueType; }
+        std::string asString() const;
 
 };
 
@@ -50,7 +58,7 @@ class Array : public Node {
         void append(const std::shared_ptr<Node> &toAdd); 
         ~Array() override {}
         int GetSize() const {return size;}
-        const Array &operator[](int index);
+        std::shared_ptr<Node> at(int index);
 };
 
 class Object : public Node {
@@ -61,7 +69,7 @@ class Object : public Node {
             Node(k, node_type::object) {}
         ~Object() override {}
         void addProp(const std::string &k, const std::shared_ptr<Node> &node);
-        const Object &operator[](const std::string &key);
+        std::shared_ptr<Node> at(const std::string &key);
 };
 
 std::shared_ptr<Node> readJson(const std::string &filename);

@@ -17,7 +17,7 @@ namespace {
     TEST_F(JsonTest, Trivial) {
         EXPECT_EQ(Json::eval(base, std::string("a.b[1]")), std::string("2")) << "a.b[1] does not return 2";
         EXPECT_EQ(Json::eval(base, std::string("a.b[2].c")),std::string("test")) << "a.b[2].c does not equal test";
-        EXPECT_EQ(Json::eval(base, std::string("a.b")), std::string("[ 1, 2, { \"c\" : \"test\" } ]"));
+        EXPECT_EQ(Json::eval(base, std::string("a.b")), std::string("[ 1, 2, { \"c\" : \"test\" }, [ 11, 12]]"));
 
     }
 
@@ -42,6 +42,6 @@ namespace {
 
     TEST(JsonParcing, Simple) {
         std::shared_ptr<Json::Node> base = Json::readJson("simpleObject.json");
-        EXPECT_EQ(base->GetRaw(), "{\"a\" : 1,\"b\" : \"3\",\"c\" : 1.3,\"d\" : \"test string\"}");
+        EXPECT_EQ(base->GetRaw(), "{ \"a\" : 1,\"b\" : \"3\",\"c\" : 1.3,\"d\" : \"test string\"}");
     }
 }
