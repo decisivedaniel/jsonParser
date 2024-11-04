@@ -33,7 +33,7 @@ std::shared_ptr<Json::Node> Json::parseJson(std::istream &file, const std::strin
 
 std::shared_ptr<Json::Object> Json::makeObject(std::istream &file, const std::string &objectKey) {
     std::stringstream raw;
-    raw << "{";
+    raw << "{ ";
     auto object = std::make_shared<Json::Object>(objectKey,"");
     // read object key
     char current;
@@ -77,7 +77,7 @@ void Json::Object::addProp(const std::string &k, const std::shared_ptr<Json::Nod
 
 std::shared_ptr<Json::Array> Json::makeArray(std::istream &file, const std::string &arrayKey) {
     std::stringstream raw;
-    raw << "[";
+    raw << "[ ";
     auto array = std::make_shared<Json::Array>(arrayKey,"");
     
     char current; 
@@ -93,9 +93,10 @@ std::shared_ptr<Json::Array> Json::makeArray(std::istream &file, const std::stri
             std::cout << "incorrect: " << current << std::endl;
             throw std::invalid_argument("expected in end of array or another property");
         }
-        raw << current;
+        raw << current; 
         if (current == ',') {
             file >> current;
+            raw << " ";
         }
     }
     array->setRaw(raw.str());
@@ -173,17 +174,16 @@ std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
     std::string::size_type dotPos = arg.find('.');
     if (dotPos != std::string::npos) {
         currentArg = arg.substr(0, dotPos);
-        remainder = arg.substr(dotPos);
+        remainder = arg.substr(dotPos+1);
     } 
     switch (n->GetType()) {
         case Json::node_type::object: 
         {
             auto object = std::dynamic_pointer_cast<Json::Object>(n);
-            //check for [] add arraypos back to the remainder "property[arraypos]"
             std::string::size_type bracketPos = currentArg.find('[');
             if (bracketPos != std::string::npos) {
                 currentArg = arg.substr(0, bracketPos);
-                remainder = arg.substr(bracketPos);
+                remainder = arg.substr(bracketPos+1);
             }
             auto next = object->at(currentArg);
             returnValue = Json::eval(next, remainder);
@@ -197,7 +197,7 @@ std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
             }
             std::string::size_type endBracketPos = currentArg.find(']');
             if (endBracketPos != std::string::npos) {
-                currentArg = arg.substr(1, endBracketPos);
+                currentArg = arg.substr(0, endBracketPos);
             } else {
                 throw std::invalid_argument("Missing end bracket for array accessor");
             }
