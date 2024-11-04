@@ -108,15 +108,29 @@ void Json::Array::append(const std::shared_ptr<Json::Node> &toAdd) {
 }
 
 std::shared_ptr<Json::Value> Json::makeValue(std::istream &file, const std::string &valueKey) {
-    // TODO fix value so it parces if string or not. much more complex state system
     std::stringstream value;
+    Json::value_type valueType = Json::value_type::number;
     char current;
     file.get(current);
+    if (current == '"') {
+        valueType = Json::value_type::string;
+    }
     while(Json::isValue(current)) {
         value << current;
         file.get(current);
+        if (current == '.') {
+            switch (valueType) {
+                case Json::value_type::number:
+                    valueType = Json::value_type::real;
+                    break;
+                case Json::value_type::real:
+                    throw std::invalid_argument("Real number should have only one decimal point");
+                case Json::value_type::string:
+                    break;
+            }
+        }
     }
-    auto jsonValue = std::make_shared<Json::Value>(valueKey, value.str());
+    auto jsonValue = std::make_shared<Json::Value>(valueKey, value.str(), valueType);
     jsonValue->setRaw(value.str());
     file.unget();
     return jsonValue;
@@ -131,9 +145,26 @@ bool Json::isValue(const char test) {
     (test >= 'a' && test <= 'z'); // lowercase letters
 }
 
+std::string Json::Value::asString() const {
+    std::stringstream returnValue;
+    returnValue << GetRaw();
+    if (getType() == value_type::string) {
+        returnValue.str("");
+        std::string::size_type lastquote = GetRaw().find_last_of('"'); 
+        returnValue << GetRaw().substr(1,lastquote-1);
+    }
+    return returnValue.str();
+}
+
 
 std::string Json::eval(std::shared_ptr<Json::Node> &n, const std::string &arg) {
     if (arg == "") {
+        if (n->GetType() == Json::node_type::value) {
+            auto value = std::dynamic_pointer_cast<Json::Value>(n);
+            if (value->getType() == Json::value_type::string) {
+                return value->asString();
+            }
+        }
         return n->GetRaw();
     } 
     std::string returnValue;
