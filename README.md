@@ -8,10 +8,15 @@ C++ console application for parcing of Json
 3. run `cmake --build build`
 4. run `cd build && ctest` or go into build folder and run ctest
 
+If problems are run into try deleting the Cmake cache in the build folder and re-running step 3 and 4.
+
 If you prefer to run gcc the following command will work for getting json_eval compiled
 
 1. `gcc -o json_eval.exe json_eval.cpp json.cpp -lstdc++`
 2. ./json_eval.exe "{file name}" "{function to run}"
+
+# Missing features
+Min, Max, Number Literals, subscript operator
 
 # Design Decisions
 
@@ -23,7 +28,7 @@ Unfortunatly this attempt failed, due to old existing notions of how to breakdow
 
 ## unorderedmap
 
-To handle the wide variablity of string options that a json object can be passed with, an optimization is to build the internal hash map to hold this key value stores that can be passed.
+To handle the wide variablity of string options that a json object can be passed with, an optimization is to build the internal hash map to hold this key value stores that can be passed. This will increase retrival of the properties.
 
 ## optimizations ruled out
 
